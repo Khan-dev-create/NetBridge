@@ -1,6 +1,7 @@
 plugins {
     kotlin("jvm") version "1.9.22"
     id("io.ktor.plugin") version "2.3.12"
+    id("com.github.johnrengelman.shadow") version "8.1.1"
     application
 }
 
