@@ -5,30 +5,31 @@ import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.websocket.*
 import kotlinx.coroutines.*
-import kotlin.time.Duration.Companion.minutes
-import kotlin.time.Duration.Companion.seconds
+import java.time.Duration
 
 fun main() {
     val port = System.getenv("PORT")?.toInt() ?: 8080
 
     embeddedServer(Netty, port = port, host = "0.0.0.0") {
         install(WebSockets) {
-            pingPeriod = 15.seconds
-            timeout = 30.seconds
-            maxFrameSize = 65536
+            pingPeriodMillis = 15_000L
+            timeoutMillis = 30_000L
+            maxFrameSize = 65536L
         }
         configureRouting()
 
         // Cleanup job
         launch {
             while (true) {
-                delay(10.minutes)
+                delay(10 * 60 * 1000L) // 10 minutes
                 val now = System.currentTimeMillis()
-                val toRemove = sessions.entries.filter { (_, session) ->
-                    session.hostSocket == null &&
-                    session.clients.isEmpty() &&
-                    (now - session.createdAt) > 30 * 60 * 1000
-                }.map { it.key }
+                val toRemove = sessions.entries
+                    .filter { (_, session) ->
+                        session.hostSocket == null &&
+                        session.clients.isEmpty() &&
+                        (now - session.createdAt) > 30 * 60 * 1000L
+                    }
+                    .map { it.key }
 
                 toRemove.forEach {
                     sessions.remove(it)
